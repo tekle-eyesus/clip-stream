@@ -1,22 +1,33 @@
-import * as vscode from "vscode";
-import { ClipboardManager } from "./ClipboardManager";
-import { ClipboardViewProvider } from "./ClipboardViewProvider";
+import * as vscode from 'vscode';
+import { ClipboardViewProvider } from './ClipboardViewProvider';
 
-export function activate(context: vscode.ExtensionContext): void {
-    const clipboardManager = new ClipboardManager();
-    const viewProvider = new ClipboardViewProvider(context.extensionUri, clipboardManager);
+export function activate(context: vscode.ExtensionContext) {
+    const provider = new ClipboardViewProvider(context.extensionUri);
+    let history: string[] = [];
+    let lastClipboard = "";
 
+    // Register Sidebar
     context.subscriptions.push(
-        vscode.window.registerWebviewViewProvider(ClipboardViewProvider.viewType, viewProvider),
+        vscode.window.registerWebviewViewProvider(ClipboardViewProvider.viewType, provider)
     );
 
-    const helloCommand = vscode.commands.registerCommand("clip-stream.hello", async () => {
-        await vscode.window.showInformationMessage("Clip Stream is active.");
-    });
+    // Clipboard Polling Logic
+    const pollInterval = setInterval(async () => {
+        const currentClip = await vscode.env.clipboard.readText();
 
-    context.subscriptions.push(helloCommand);
-}
+        if (currentClip && currentClip !== lastClipboard) {
+            lastClipboard = currentClip;
 
-export function deactivate(): void {
-    // Nothing to clean up yet.
+            // Add to start, remove duplicates, limit to 20
+            history = [currentClip, ...history.filter(i => i !== currentClip)].slice(0, 20);
+            provider.updateList(history);
+        }
+    }, 1000);
+
+    context.subscriptions.push({ dispose: () => clearInterval(pollInterval) });
+
+    // Command to focus
+    context.subscriptions.push(vscode.commands.registerCommand('clip-stream.focus', () => {
+        vscode.commands.executeCommand('workbench.view.extension.clip-stream-explorer');
+    }));
 }
