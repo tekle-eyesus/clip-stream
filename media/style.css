@@ -1,35 +1,69 @@
 :root {
-  color-scheme: light dark;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --container-padding: 10px;
 }
 
 body {
-  margin: 0;
   padding: 0;
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  background-color: var(--vscode-sideBar-background);
 }
 
-.container {
-  padding: 12px;
+.clip-item {
+  border-bottom: 1px solid var(--vscode-divider);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-h1 {
-  font-size: 16px;
-  margin: 0 0 8px;
+.clip-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
 }
 
-.subtitle {
-  margin: 0 0 12px;
-  opacity: 0.8;
+.header {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--vscode-symbolIcon-propertyForeground);
 }
 
-#clearBtn {
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 6px 10px;
+.preview {
+  font-family: var(--vscode-editor-font-family);
+  font-size: 0.8em;
+  background: var(--vscode-editor-background);
+  padding: 5px;
+  border-radius: 3px;
+  white-space: pre-wrap;
+  max-height: 100px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-widget-border);
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+button {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: none;
+  padding: 4px 8px;
   cursor: pointer;
+  font-size: 0.8em;
 }
 
-#historyList {
-  margin: 12px 0 0;
-  padding-left: 18px;
+button:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+button.primary {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+button.primary:hover {
+  background: var(--vscode-button-hoverBackground);
 }
