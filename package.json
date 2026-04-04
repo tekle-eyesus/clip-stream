@@ -1,50 +1,48 @@
 {
   "name": "clip-stream",
-  "displayName": "Clip Stream",
-  "description": "A VS Code extension for clipboard history in a sidebar view.",
+  "displayName": "Clipboard Stream",
   "version": "0.0.1",
-  "publisher": "your-name",
   "engines": {
-    "vscode": "^1.95.0"
+    "vscode": "^1.80.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:clipStream.sidebar",
-    "onCommand:clip-stream.hello"
-  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "clip-stream.hello",
-        "title": "Clip Stream: Hello"
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "clipStream",
-          "title": "Clip Stream"
+          "id": "clip-stream-explorer",
+          "title": "Clip Stream",
+          "icon": "$(clippy)"
         }
       ]
     },
     "views": {
-      "clipStream": [
+      "clip-stream-explorer": [
         {
-          "id": "clipStream.sidebar",
-          "name": "History"
+          "type": "webview",
+          "id": "clip-stream-view",
+          "name": "Clipboard Stream"
         }
       ]
-    }
+    },
+    "commands": [
+      {
+        "command": "clip-stream.focus",
+        "title": "Open Clipboard Stream Panel"
+      }
+    ]
   },
   "scripts": {
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.95.0",
-    "typescript": "^5.6.0"
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
   }
 }
