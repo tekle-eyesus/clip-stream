@@ -29,10 +29,24 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "clip-stream.clear",
+          "when": "view == clip-stream-view",
+          "group": "navigation"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "clip-stream.focus",
         "title": "Open Clipboard Stream Panel"
+      },
+      {
+        "command": "clip-stream.clear",
+        "title": "Clear All Clips",
+        "icon": "$(trash)"
       }
     ]
   },

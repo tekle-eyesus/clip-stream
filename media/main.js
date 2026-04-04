@@ -10,19 +10,21 @@ window.addEventListener("message", (event) => {
 
 function render(items) {
   listContainer.innerHTML = "";
-  items.forEach((item) => {
+  items.forEach((item, index) => {
     const div = document.createElement("div");
     div.className = "clip-item";
 
     const type = detectType(item);
     const icon = type === "file" ? "📁" : type === "code" ? "💻" : "📝";
 
+    // Sanitize item for preview (prevent HTML injection)
+    const safeText = item.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
     div.innerHTML = `
-            <div class="header">
-                <span>${icon} ${item.substring(0, 30)}${item.length > 30 ? "..." : ""}</span>
-            </div>
+            <div class="header">${icon} Item ${index + 1}</div>
+            <div class="preview">${safeText}</div>
             <div class="actions">
-                <button onclick="insert('${encodeURIComponent(item)}')">Insert</button>
+                <button class="primary" onclick="insert('${encodeURIComponent(item)}')">Insert</button>
                 <button onclick="copy('${encodeURIComponent(item)}')">Copy</button>
             </div>
         `;
