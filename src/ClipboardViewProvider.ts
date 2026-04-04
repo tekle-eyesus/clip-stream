@@ -1,52 +1,56 @@
-import * as vscode from "vscode";
-import { ClipboardManager } from "./ClipboardManager";
+import * as vscode from 'vscode';
 
 export class ClipboardViewProvider implements vscode.WebviewViewProvider {
-    public static readonly viewType = "clipStream.sidebar";
+    public static readonly viewType = 'clip-stream-view';
+    private _view?: vscode.WebviewView;
 
-    constructor(
-        private readonly extensionUri: vscode.Uri,
-        private readonly clipboardManager: ClipboardManager,
-    ) { }
+    constructor(private readonly _extensionUri: vscode.Uri) { }
 
-    resolveWebviewView(webviewView: vscode.WebviewView): void {
-        const webview = webviewView.webview;
+    public resolveWebviewView(webviewView: vscode.WebviewView) {
+        this._view = webviewView;
 
-        webview.options = {
+        webviewView.webview.options = {
             enableScripts: true,
-            localResourceRoots: [vscode.Uri.joinPath(this.extensionUri, "media")],
+            localResourceRoots: [this._extensionUri]
         };
 
-        webview.html = this.getHtml(webview);
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webview.onDidReceiveMessage((message) => {
-            if (message.type === "clear") {
-                this.clipboardManager.clearHistory();
+        // Handle messages from the webview
+        webviewView.webview.onDidReceiveMessage(data => {
+            switch (data.type) {
+                case 'insert':
+                    vscode.window.activeTextEditor?.edit(editBuilder => {
+                        editBuilder.insert(vscode.window.activeTextEditor!.selection.active, data.value);
+                    });
+                    break;
+                case 'copy':
+                    vscode.env.clipboard.writeText(data.value);
+                    vscode.window.showInformationMessage('Copied back to clipboard!');
+                    break;
             }
         });
     }
 
-    private getHtml(webview: vscode.Webview): string {
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, "media", "main.js"));
-        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, "media", "style.css"));
+    public updateList(items: string[]) {
+        if (this._view) {
+            this._view.webview.postMessage({ type: 'update', items });
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview) {
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
+        const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'style.css'));
 
         return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="${styleUri}" />
-    <title>Clip Stream</title>
-  </head>
-  <body>
-    <section class="container">
-      <h1>Clip Stream</h1>
-      <p class="subtitle">Clipboard history will appear here.</p>
-      <button id="clearBtn" type="button">Clear History</button>
-      <ul id="historyList"></ul>
-    </section>
-    <script src="${scriptUri}"></script>
-  </body>
-</html>`;
+            <html lang="en">
+            <head>
+                <link href="${styleUri}" rel="stylesheet">
+            </head>
+            <body>
+                <div id="item-list"></div>
+                <script src="${scriptUri}"></script>
+            </body>
+            </html>`;
     }
 }
