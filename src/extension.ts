@@ -4,6 +4,7 @@ import { ClipboardViewProvider } from './ClipboardViewProvider';
 export function activate(context: vscode.ExtensionContext) {
     // 1. Load existing history from storage
     let history: string[] = context.globalState.get('clipHistory', []);
+    const deletedHistory = new Set<string>(context.globalState.get<string[]>('deletedClipHistory', []));
     let lastClipboard = history[0] ?? '';
 
     const provider = new ClipboardViewProvider(context.extensionUri, async (data) => {
@@ -26,8 +27,14 @@ export function activate(context: vscode.ExtensionContext) {
                     break;
                 }
 
+                const deletedItem = history[data.index];
                 history = history.filter((_, i) => i !== data.index);
+                if (deletedItem) {
+                    deletedHistory.add(deletedItem);
+                }
+
                 await context.globalState.update('clipHistory', history);
+                await context.globalState.update('deletedClipHistory', [...deletedHistory]);
                 provider.updateList(history);
                 lastClipboard = history[0] ?? '';
                 break;
@@ -41,6 +48,12 @@ export function activate(context: vscode.ExtensionContext) {
 
     const pollInterval = setInterval(async () => {
         const currentClip = await vscode.env.clipboard.readText();
+
+        if (currentClip && deletedHistory.has(currentClip)) {
+            // Keep deleted items from being re-added by polling the current clipboard value.
+            lastClipboard = currentClip;
+            return;
+        }
 
         if (currentClip && currentClip !== lastClipboard) {
             lastClipboard = currentClip;
