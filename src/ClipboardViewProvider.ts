@@ -4,7 +4,10 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'clip-stream-view';
     private _view?: vscode.WebviewView;
 
-    constructor(private readonly _extensionUri: vscode.Uri) { }
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+        private readonly _onMessage: (data: { type: string; value?: string; index?: number }) => void,
+    ) { }
 
     public resolveWebviewView(webviewView: vscode.WebviewView) {
         this._view = webviewView;
@@ -16,20 +19,7 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        // Handle messages from the webview
-        webviewView.webview.onDidReceiveMessage(data => {
-            switch (data.type) {
-                case 'insert':
-                    vscode.window.activeTextEditor?.edit(editBuilder => {
-                        editBuilder.insert(vscode.window.activeTextEditor!.selection.active, data.value);
-                    });
-                    break;
-                case 'copy':
-                    vscode.env.clipboard.writeText(data.value);
-                    vscode.window.showInformationMessage('Copied back to clipboard!');
-                    break;
-            }
-        });
+        webviewView.webview.onDidReceiveMessage((data) => this._onMessage(data));
     }
 
     public updateList(items: string[]) {

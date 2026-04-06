@@ -17,17 +17,41 @@ function render(items) {
     const type = detectType(item);
     const icon = type === "file" ? "📁" : type === "code" ? "💻" : "📝";
 
-    // Sanitize item for preview (prevent HTML injection)
-    const safeText = item.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const header = document.createElement("div");
+    header.className = "header";
+    header.textContent = `${icon} Item ${index + 1}`;
 
-    div.innerHTML = `
-            <div class="header">${icon} Item ${index + 1}</div>
-            <div class="preview">${safeText}</div>
-            <div class="actions">
-                <button class="primary" onclick="insert('${encodeURIComponent(item)}')">Insert</button>
-                <button onclick="copy('${encodeURIComponent(item)}')">Copy</button>
-            </div>
-        `;
+    const preview = document.createElement("div");
+    preview.className = "preview";
+    preview.textContent = item;
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const insertButton = document.createElement("button");
+    insertButton.className = "primary";
+    insertButton.type = "button";
+    insertButton.textContent = "Insert";
+    insertButton.addEventListener("click", () => {
+      vscode.postMessage({ type: "insert", value: item });
+    });
+
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.textContent = "Copy";
+    copyButton.addEventListener("click", () => {
+      vscode.postMessage({ type: "copy", value: item });
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => {
+      vscode.postMessage({ type: "delete", index });
+    });
+
+    actions.append(insertButton, copyButton, deleteButton);
+    div.append(header, preview, actions);
     listContainer.appendChild(div);
   });
 }
@@ -43,8 +67,3 @@ function detectType(text) {
     return "code";
   return "text";
 }
-
-window.insert = (val) =>
-  vscode.postMessage({ type: "insert", value: decodeURIComponent(val) });
-window.copy = (val) =>
-  vscode.postMessage({ type: "copy", value: decodeURIComponent(val) });

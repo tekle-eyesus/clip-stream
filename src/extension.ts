@@ -2,11 +2,38 @@ import * as vscode from 'vscode';
 import { ClipboardViewProvider } from './ClipboardViewProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-    const provider = new ClipboardViewProvider(context.extensionUri);
-
     // 1. Load existing history from storage
     let history: string[] = context.globalState.get('clipHistory', []);
     let lastClipboard = history[0] ?? '';
+
+    const provider = new ClipboardViewProvider(context.extensionUri, async (data) => {
+        switch (data.type) {
+            case 'insert': {
+                const value = data.value ?? '';
+                await vscode.window.activeTextEditor?.edit((editBuilder) => {
+                    editBuilder.insert(vscode.window.activeTextEditor!.selection.active, value);
+                });
+                break;
+            }
+            case 'copy': {
+                const value = data.value ?? '';
+                await vscode.env.clipboard.writeText(value);
+                vscode.window.showInformationMessage('Copied back to clipboard!');
+                break;
+            }
+            case 'delete': {
+                if (typeof data.index !== 'number') {
+                    break;
+                }
+
+                history = history.filter((_, i) => i !== data.index);
+                await context.globalState.update('clipHistory', history);
+                provider.updateList(history);
+                lastClipboard = history[0] ?? '';
+                break;
+            }
+        }
+    });
 
     context.subscriptions.push(
         vscode.window.registerWebviewViewProvider(ClipboardViewProvider.viewType, provider)
@@ -36,5 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
         history = [];
         context.globalState.update('clipHistory', []);
         provider.updateList([]);
+        lastClipboard = '';
     }));
 }
