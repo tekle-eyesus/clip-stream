@@ -3,10 +3,41 @@
 }
 
 body {
+  margin: 0;
   padding: 0;
   color: var(--vscode-foreground);
   font-family: var(--vscode-font-family);
   background-color: var(--vscode-sideBar-background);
+}
+
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-bottom: 1px solid var(--vscode-widget-border);
+  background: var(--vscode-sideBar-background);
+}
+
+#search-input {
+  width: 100%;
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+}
+
+.kbd-hint {
+  font-size: 0.75em;
+  color: var(--vscode-descriptionForeground);
+}
+
+#item-list {
+  padding: 6px 0;
 }
 
 .clip-item {
@@ -19,6 +50,12 @@ body {
 
 .clip-item:hover {
   background-color: var(--vscode-list-hoverBackground);
+}
+
+.clip-item.selected {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
 }
 
 .header {
@@ -66,4 +103,15 @@ button.primary {
 
 button.primary:hover {
   background: var(--vscode-button-hoverBackground);
+}
+
+button.pinned {
+  background: var(--vscode-testing-iconPassed);
+  color: var(--vscode-button-foreground);
+}
+
+.empty-state {
+  padding: 16px 12px;
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.9em;
 }

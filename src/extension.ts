@@ -5,7 +5,18 @@ export function activate(context: vscode.ExtensionContext) {
     // 1. Load existing history from storage
     let history: string[] = context.globalState.get('clipHistory', []);
     const deletedHistory = new Set<string>(context.globalState.get<string[]>('deletedClipHistory', []));
+    const pinnedHistory = new Set<string>(context.globalState.get<string[]>('pinnedClipHistory', []));
     let lastClipboard = history[0] ?? '';
+
+    const getOrderedHistory = (): string[] => {
+        const pinned = history.filter((item) => pinnedHistory.has(item));
+        const unpinned = history.filter((item) => !pinnedHistory.has(item));
+        return [...pinned, ...unpinned];
+    };
+
+    const updateView = () => {
+        provider.updateList(getOrderedHistory(), [...pinnedHistory]);
+    };
 
     const provider = new ClipboardViewProvider(context.extensionUri, async (data) => {
         switch (data.type) {
@@ -23,20 +34,36 @@ export function activate(context: vscode.ExtensionContext) {
                 break;
             }
             case 'delete': {
-                if (typeof data.index !== 'number') {
+                const value = data.value ?? '';
+                if (!value) {
                     break;
                 }
 
-                const deletedItem = history[data.index];
-                history = history.filter((_, i) => i !== data.index);
-                if (deletedItem) {
-                    deletedHistory.add(deletedItem);
-                }
+                history = history.filter((item) => item !== value);
+                deletedHistory.add(value);
+                pinnedHistory.delete(value);
 
                 await context.globalState.update('clipHistory', history);
                 await context.globalState.update('deletedClipHistory', [...deletedHistory]);
-                provider.updateList(history);
+                await context.globalState.update('pinnedClipHistory', [...pinnedHistory]);
+                updateView();
                 lastClipboard = history[0] ?? '';
+                break;
+            }
+            case 'pinToggle': {
+                const value = data.value ?? '';
+                if (!value) {
+                    break;
+                }
+
+                if (pinnedHistory.has(value)) {
+                    pinnedHistory.delete(value);
+                } else {
+                    pinnedHistory.add(value);
+                }
+
+                await context.globalState.update('pinnedClipHistory', [...pinnedHistory]);
+                updateView();
                 break;
             }
         }
@@ -62,20 +89,22 @@ export function activate(context: vscode.ExtensionContext) {
             // 2. Save to storage
             context.globalState.update('clipHistory', history);
 
-            provider.updateList(history);
+            updateView();
         }
     }, 1000);
 
     context.subscriptions.push({ dispose: () => clearInterval(pollInterval) });
 
     // Initial update to show saved items on load
-    setTimeout(() => provider.updateList(history), 500);
+    setTimeout(() => updateView(), 500);
 
     // Add a "Clear" command
     context.subscriptions.push(vscode.commands.registerCommand('clip-stream.clear', () => {
         history = [];
         context.globalState.update('clipHistory', []);
-        provider.updateList([]);
+        pinnedHistory.clear();
+        context.globalState.update('pinnedClipHistory', []);
+        updateView();
         lastClipboard = '';
     }));
 }

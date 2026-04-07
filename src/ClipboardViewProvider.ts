@@ -1,12 +1,17 @@
 import * as vscode from 'vscode';
 
+type WebviewInboundMessage = {
+    type: 'insert' | 'copy' | 'delete' | 'pinToggle';
+    value?: string;
+};
+
 export class ClipboardViewProvider implements vscode.WebviewViewProvider {
     public static readonly viewType = 'clip-stream-view';
     private _view?: vscode.WebviewView;
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
-        private readonly _onMessage: (data: { type: string; value?: string; index?: number }) => void,
+        private readonly _onMessage: (data: WebviewInboundMessage) => void,
     ) { }
 
     public resolveWebviewView(webviewView: vscode.WebviewView) {
@@ -22,9 +27,9 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage((data) => this._onMessage(data));
     }
 
-    public updateList(items: string[]) {
+    public updateList(items: string[], pinnedItems: string[]) {
         if (this._view) {
-            this._view.webview.postMessage({ type: 'update', items });
+            this._view.webview.postMessage({ type: 'update', items, pinnedItems });
         }
     }
 
@@ -35,9 +40,15 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
         return `<!DOCTYPE html>
             <html lang="en">
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <link href="${styleUri}" rel="stylesheet">
             </head>
             <body>
+                <div class="toolbar">
+                    <input id="search-input" type="search" placeholder="Search clips (Ctrl/Cmd+F)" aria-label="Search clips" />
+                    <div class="kbd-hint">Arrows: Select | Enter: Insert | P: Pin | Del: Remove</div>
+                </div>
                 <div id="item-list"></div>
                 <script src="${scriptUri}"></script>
             </body>
