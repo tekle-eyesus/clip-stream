@@ -1,7 +1,19 @@
 {
   "name": "clip-stream",
   "displayName": "Clipboard Stream",
+  "description": "Clipboard history manager for VS Code with search, pinning, and keyboard-first actions.",
   "version": "0.0.1",
+  "publisher": "Tekleeyesus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tekle-eyesus/clip-stream"
+  },
+  "homepage": "https://github.com/tekle-eyesus/clip-stream#readme",
+  "bugs": {
+    "url": "https://github.com/tekle-eyesus/clip-stream/issues"
+  },
+  "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.80.0"
   },
@@ -53,9 +65,12 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "publish:patch": "vsce publish patch"
   },
   "devDependencies": {
+    "@vscode/vsce": "^3.6.2",
     "@types/node": "^22.15.2",
     "@types/vscode": "^1.80.0",
     "typescript": "^5.0.0"

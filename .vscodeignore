@@ -1,0 +1,9 @@
+.vscode/**
+src/**
+.git/**
+.gitignore
+tsconfig.json
+**/*.ts
+**/*.map
+node_modules/**/.bin/**
+README-assets/**
