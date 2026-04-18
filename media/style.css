@@ -78,8 +78,39 @@ body {
   border: 1px solid var(--vscode-widget-border);
 }
 
+.note-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 9px;
+  border-left: 3px solid var(--vscode-focusBorder);
+  border-radius: 6px;
+  background: color-mix(
+    in srgb,
+    var(--vscode-editor-background) 88%,
+    var(--vscode-focusBorder) 12%
+  );
+}
+
+.note-label {
+  font-size: 0.72em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.note-text {
+  font-size: 0.82em;
+  line-height: 1.4;
+  color: var(--vscode-foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 5px;
 }
 
@@ -103,6 +134,15 @@ button.primary {
 
 button.primary:hover {
   background: var(--vscode-button-hoverBackground);
+}
+
+button.secondary-action {
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+button.secondary-action:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
 }
 
 button.pinned {

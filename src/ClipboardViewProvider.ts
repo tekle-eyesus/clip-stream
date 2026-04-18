@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
+import type { ClipboardEntry } from './ClipboardManager';
 
 type WebviewInboundMessage = {
-    type: 'insert' | 'copy' | 'delete' | 'pinToggle';
+    type: 'insert' | 'copy' | 'delete' | 'pinToggle' | 'setNote' | 'requestNote';
     value?: string;
+    note?: string;
 };
 
 export class ClipboardViewProvider implements vscode.WebviewViewProvider {
@@ -27,7 +29,7 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
         webviewView.webview.onDidReceiveMessage((data) => this._onMessage(data));
     }
 
-    public updateList(items: string[], pinnedItems: string[]) {
+    public updateList(items: ClipboardEntry[], pinnedItems: string[]) {
         if (this._view) {
             this._view.webview.postMessage({ type: 'update', items, pinnedItems });
         }
@@ -47,7 +49,7 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
             <body>
                 <div class="toolbar">
                     <input id="search-input" type="search" placeholder="Search clips (Ctrl/Cmd+F)" aria-label="Search clips" />
-                    <div class="kbd-hint">Arrows: Select | Enter: Insert | P: Pin | Del: Remove</div>
+                    <div class="kbd-hint">Arrows: Select | Enter: Insert | P: Pin | N: Note | Del: Remove</div>
                 </div>
                 <div id="item-list"></div>
                 <script src="${scriptUri}"></script>

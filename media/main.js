@@ -7,10 +7,23 @@ let filteredItems = [];
 let pinnedSet = new Set();
 let selectedIndex = -1;
 
+function normalizeItem(item) {
+  if (!item || typeof item.text !== "string") {
+    return null;
+  }
+
+  return {
+    text: item.text,
+    note: typeof item.note === "string" ? item.note : "",
+  };
+}
+
 window.addEventListener("message", (event) => {
   const message = event.data;
   if (message.type === "update") {
-    allItems = Array.isArray(message.items) ? message.items : [];
+    allItems = Array.isArray(message.items)
+      ? message.items.map(normalizeItem).filter(Boolean)
+      : [];
     pinnedSet = new Set(
       Array.isArray(message.pinnedItems) ? message.pinnedItems : [],
     );
@@ -58,7 +71,7 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     const selected = filteredItems[selectedIndex];
     if (selected) {
-      vscode.postMessage({ type: "insert", value: selected });
+      vscode.postMessage({ type: "insert", value: selected.text });
     }
     return;
   }
@@ -67,7 +80,16 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     const selected = filteredItems[selectedIndex];
     if (selected) {
-      vscode.postMessage({ type: "pinToggle", value: selected });
+      vscode.postMessage({ type: "pinToggle", value: selected.text });
+    }
+    return;
+  }
+
+  if (!isInputFocused && event.key.toLowerCase() === "n") {
+    event.preventDefault();
+    const selected = filteredItems[selectedIndex];
+    if (selected) {
+      requestNoteInput(selected);
     }
     return;
   }
@@ -76,7 +98,7 @@ window.addEventListener("keydown", (event) => {
     event.preventDefault();
     const selected = filteredItems[selectedIndex];
     if (selected) {
-      vscode.postMessage({ type: "delete", value: selected });
+      vscode.postMessage({ type: "delete", value: selected.text });
     }
   }
 });
@@ -84,7 +106,11 @@ window.addEventListener("keydown", (event) => {
 function applyFilter() {
   const query = (searchInput?.value || "").trim().toLowerCase();
   filteredItems = query
-    ? allItems.filter((item) => item.toLowerCase().includes(query))
+    ? allItems.filter(
+        (item) =>
+          item.text.toLowerCase().includes(query) ||
+          item.note.toLowerCase().includes(query),
+      )
     : [...allItems];
 
   if (!filteredItems.length) {
@@ -114,9 +140,9 @@ function render(items) {
       div.classList.add("selected");
     }
 
-    const type = detectType(item);
+    const type = detectType(item.text);
     const icon = type === "file" ? "📁" : type === "code" ? "💻" : "📝";
-    const isPinned = pinnedSet.has(item);
+    const isPinned = pinnedSet.has(item.text);
 
     const header = document.createElement("div");
     header.className = "header";
@@ -124,7 +150,23 @@ function render(items) {
 
     const preview = document.createElement("div");
     preview.className = "preview";
-    preview.textContent = item;
+    preview.textContent = item.text;
+
+    let noteBlock = null;
+    if (item.note) {
+      noteBlock = document.createElement("div");
+      noteBlock.className = "note-block";
+
+      const noteLabel = document.createElement("span");
+      noteLabel.className = "note-label";
+      noteLabel.textContent = "Note";
+
+      const noteText = document.createElement("span");
+      noteText.className = "note-text";
+      noteText.textContent = item.note;
+
+      noteBlock.append(noteLabel, noteText);
+    }
 
     const actions = document.createElement("div");
     actions.className = "actions";
@@ -134,14 +176,14 @@ function render(items) {
     insertButton.type = "button";
     insertButton.textContent = "Insert";
     insertButton.addEventListener("click", () => {
-      vscode.postMessage({ type: "insert", value: item });
+      vscode.postMessage({ type: "insert", value: item.text });
     });
 
     const copyButton = document.createElement("button");
     copyButton.type = "button";
     copyButton.textContent = "Copy";
     copyButton.addEventListener("click", () => {
-      vscode.postMessage({ type: "copy", value: item });
+      vscode.postMessage({ type: "copy", value: item.text });
     });
 
     const pinButton = document.createElement("button");
@@ -149,18 +191,36 @@ function render(items) {
     pinButton.className = isPinned ? "pinned" : "";
     pinButton.textContent = isPinned ? "Unpin" : "Pin";
     pinButton.addEventListener("click", () => {
-      vscode.postMessage({ type: "pinToggle", value: item });
+      vscode.postMessage({ type: "pinToggle", value: item.text });
+    });
+
+    const noteButton = document.createElement("button");
+    noteButton.type = "button";
+    noteButton.className = "secondary-action";
+    noteButton.textContent = item.note ? "Edit Note" : "Add Note";
+    noteButton.addEventListener("click", () => {
+      requestNoteInput(item);
     });
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", () => {
-      vscode.postMessage({ type: "delete", value: item });
+      vscode.postMessage({ type: "delete", value: item.text });
     });
 
-    actions.append(insertButton, copyButton, pinButton, deleteButton);
-    div.append(header, preview, actions);
+    actions.append(
+      insertButton,
+      copyButton,
+      pinButton,
+      noteButton,
+      deleteButton,
+    );
+    div.append(header, preview);
+    if (noteBlock) {
+      div.append(noteBlock);
+    }
+    div.append(actions);
     listContainer.appendChild(div);
   });
 }
@@ -175,4 +235,12 @@ function detectType(text) {
   if (text.includes("\n") || text.includes(" {") || text.includes("```"))
     return "code";
   return "text";
+}
+
+function requestNoteInput(item) {
+  vscode.postMessage({
+    type: "requestNote",
+    value: item.text,
+    note: item.note || "",
+  });
 }

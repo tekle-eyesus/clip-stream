@@ -23,6 +23,7 @@ Clip Stream automatically captures text you copy, stores it in order, and lets y
 - Clean sidebar history for copied text.
 - Persistent storage across VS Code restarts.
 - Pin important clips to keep them at the top.
+- Add short notes to clips for quick reminders or labels.
 - Insert, copy, delete, and clear clips quickly from the panel.
 - Keyboard-friendly navigation for fast reuse.
 
@@ -33,6 +34,7 @@ Clip Stream automatically captures text you copy, stores it in order, and lets y
 - **Automatic clipboard capture** — polls the clipboard every second and records any new text you copy, keeping the most recent 20 entries.
 - **Persistent history** — clipboard entries survive VS Code restarts; history is saved to global extension storage.
 - **Pin clips** — pin important entries to the top of the list so they are never pushed out by new copies.
+- **Clip notes** — attach a short note of up to 10 words to any clip for reminders or labeling.
 - **Delete clips** — remove individual entries from the history; deleted items are ignored if copied again.
 - **Insert into editor** — click or press Enter on any clip to insert it at the current cursor position in the active editor.
 - **Copy to clipboard** — copy any historical clip back to the system clipboard with a single action.
@@ -107,7 +109,7 @@ npm run compile
 3. Open the **Clip Stream** panel in the Activity Bar to view your history.
 4. Use the toolbar search box to filter entries.
 5. Click an entry (or navigate with arrow keys and press Enter) to insert it at the cursor.
-6. Press **P** on a selected entry to pin it; press **Delete** to remove it.
+6. Press **P** on a selected entry to pin it, **N** to add or edit a note, and **Delete** to remove it.
 7. Click the **Clear All Clips** button in the panel title bar to reset the entire history.
 
 ---
