@@ -5,15 +5,22 @@ import { ClipboardViewProvider } from './ClipboardViewProvider';
 const CLIP_HISTORY_KEY = 'clipHistory';
 const DELETED_HISTORY_KEY = 'deletedClipHistory';
 const PINNED_HISTORY_KEY = 'pinnedClipHistory';
+const normalizeClipText = (value: string): string => value.trim();
 
 export function activate(context: vscode.ExtensionContext) {
     const storedHistory = context.globalState.get<unknown[]>(CLIP_HISTORY_KEY, []);
     const clipboardManager = new ClipboardManager(ClipboardManager.normalizeHistory(storedHistory));
-    const deletedHistory = new Set<string>(context.globalState.get<string[]>(DELETED_HISTORY_KEY, []));
+    const deletedHistory = new Set<string>(
+        context.globalState
+            .get<string[]>(DELETED_HISTORY_KEY, [])
+            .map((value) => normalizeClipText(value))
+            .filter((value) => Boolean(value))
+    );
     const pinnedHistory = new Set<string>(context.globalState.get<string[]>(PINNED_HISTORY_KEY, []));
-    let lastClipboard = clipboardManager.getHistory()[0]?.text ?? '';
+    let lastClipboard = normalizeClipText(clipboardManager.getHistory()[0]?.text ?? '');
 
     void context.globalState.update(CLIP_HISTORY_KEY, clipboardManager.getHistory());
+    void context.globalState.update(DELETED_HISTORY_KEY, [...deletedHistory]);
 
     const getOrderedHistory = (): ClipboardEntry[] => {
         const history = clipboardManager.getHistory();
@@ -81,12 +88,12 @@ export function activate(context: vscode.ExtensionContext) {
                     break;
                 }
 
-                deletedHistory.add(value);
+                deletedHistory.add(normalizeClipText(value));
                 pinnedHistory.delete(value);
 
                 await persistState();
                 updateView();
-                lastClipboard = clipboardManager.getHistory()[0]?.text ?? '';
+                lastClipboard = normalizeClipText(clipboardManager.getHistory()[0]?.text ?? '');
                 break;
             }
             case 'pinToggle': {
@@ -148,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     const pollInterval = setInterval(async () => {
-        const currentClip = await vscode.env.clipboard.readText();
+        const currentClip = normalizeClipText(await vscode.env.clipboard.readText());
 
         if (currentClip && deletedHistory.has(currentClip)) {
             // Keep deleted items from being re-added by polling the current clipboard value.
