@@ -1,15 +1,30 @@
-# Clip Stream
+<p align="center">
+	<img src="https://res.cloudinary.com/dewvz4zxk/image/upload/v1776501318/copy-paste_ooz86l.png" alt="Clip Stream logo" width="100" />
+</p>
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue)
-![VS Code](https://img.shields.io/badge/VS%20Code-%5E1.80.0-007ACC)
-![TypeScript](https://img.shields.io/badge/TypeScript-%5E5.0.0-3178C6)
-![Node.js](https://img.shields.io/badge/Node.js-%5E22.x-339933)
-![HTML](https://img.shields.io/badge/HTML5-webview-E34F26)
-![CSS](https://img.shields.io/badge/CSS3-webview-1572B6)
-![JavaScript](https://img.shields.io/badge/JavaScript-webview-F7DF1E)
-![License](https://img.shields.io/badge/license-MIT-green)
+<h1 align="center">Clip Stream</h1>
 
-Clip Stream is a VS Code extension that tracks your clipboard history in a dedicated sidebar panel. Every time you copy text, it is automatically captured and stored so you can revisit, re-insert, pin, or remove any previous clip — all without leaving your editor.
+<p align="center">
+	A VS Code extension that captures your clipboard history and keeps it ready in a dedicated sidebar panel.
+</p>
+
+<p align="center">
+	<img src="https://img.shields.io/badge/version-0.0.1-blue" alt="Version" />
+	<img src="https://img.shields.io/badge/VS%20Code-%5E1.80.0-007ACC" alt="VS Code" />
+	<img src="https://img.shields.io/badge/TypeScript-%5E5.0.0-3178C6" alt="TypeScript" />
+	<img src="https://img.shields.io/badge/Node.js-%5E22.x-339933" alt="Node.js" />
+	<img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
+</p>
+
+Clip Stream automatically captures text you copy, stores it in order, and lets you revisit, re-insert, pin, search, or remove previous clips without leaving your editor.
+
+## Highlights
+
+- Clean sidebar history for copied text.
+- Persistent storage across VS Code restarts.
+- Pin important clips to keep them at the top.
+- Insert, copy, delete, and clear clips quickly from the panel.
+- Keyboard-friendly navigation for fast reuse.
 
 ---
 
@@ -29,13 +44,13 @@ Clip Stream is a VS Code extension that tracks your clipboard history in a dedic
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Extension language | TypeScript 5 |
+| Layer              | Technology                           |
+| ------------------ | ------------------------------------ |
+| Extension language | TypeScript 5                         |
 | Extension host API | VS Code Extension API (vscode ^1.80) |
-| Runtime | Node.js 22 |
-| Webview UI | HTML5 + CSS3 + Vanilla JavaScript |
-| Build tool | TypeScript compiler (`tsc`) |
+| Runtime            | Node.js 22                           |
+| Webview UI         | HTML5 + CSS3 + Vanilla JavaScript    |
+| Build tool         | TypeScript compiler (`tsc`)          |
 
 ---
 
@@ -99,9 +114,9 @@ npm run compile
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| `clip-stream.focus` | Open the Clipboard Stream panel |
+| Command             | Description                         |
+| ------------------- | ----------------------------------- |
+| `clip-stream.focus` | Open the Clipboard Stream panel     |
 | `clip-stream.clear` | Clear all clipboard history entries |
 
 ---
