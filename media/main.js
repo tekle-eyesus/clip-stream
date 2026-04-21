@@ -1,11 +1,14 @@
 const vscode = acquireVsCodeApi();
 const listContainer = document.getElementById("item-list");
 const searchInput = document.getElementById("search-input");
+const reorderToggle = document.getElementById("reorder-toggle");
 
 let allItems = [];
 let filteredItems = [];
 let pinnedSet = new Set();
 let selectedIndex = -1;
+let reorderMode = false;
+let draggedText = "";
 
 function normalizeItem(item) {
   if (!item || typeof item.text !== "string") {
@@ -34,6 +37,14 @@ window.addEventListener("message", (event) => {
 if (searchInput) {
   searchInput.addEventListener("input", () => {
     applyFilter();
+  });
+}
+
+if (reorderToggle) {
+  reorderToggle.addEventListener("dblclick", () => {
+    reorderMode = !reorderMode;
+    reorderToggle.textContent = reorderMode ? "Reorder: On" : "Reorder: Off";
+    render(filteredItems);
   });
 }
 
@@ -136,6 +147,55 @@ function render(items) {
   items.forEach((item, index) => {
     const div = document.createElement("div");
     div.className = "clip-item";
+    div.draggable = reorderMode;
+    div.classList.toggle("reorder-on", reorderMode);
+
+    div.addEventListener("dragstart", () => {
+      if (!reorderMode) {
+        return;
+      }
+
+      draggedText = item.text;
+      div.classList.add("dragging");
+    });
+
+    div.addEventListener("dragend", () => {
+      div.classList.remove("dragging");
+      draggedText = "";
+    });
+
+    div.addEventListener("dragover", (event) => {
+      if (!reorderMode) {
+        return;
+      }
+
+      event.preventDefault();
+      div.classList.add("drop-target");
+    });
+
+    div.addEventListener("dragleave", () => {
+      div.classList.remove("drop-target");
+    });
+
+    div.addEventListener("drop", (event) => {
+      if (!reorderMode) {
+        return;
+      }
+
+      event.preventDefault();
+      div.classList.remove("drop-target");
+
+      if (!draggedText || draggedText === item.text) {
+        return;
+      }
+
+      vscode.postMessage({
+        type: "reorder",
+        value: draggedText,
+        targetValue: item.text,
+      });
+    });
+
     if (index === selectedIndex) {
       div.classList.add("selected");
     }
@@ -175,6 +235,7 @@ function render(items) {
     insertButton.className = "primary";
     insertButton.type = "button";
     insertButton.textContent = "Insert";
+    insertButton.disabled = reorderMode;
     insertButton.addEventListener("click", () => {
       vscode.postMessage({ type: "insert", value: item.text });
     });
@@ -182,6 +243,7 @@ function render(items) {
     const copyButton = document.createElement("button");
     copyButton.type = "button";
     copyButton.textContent = "Copy";
+    copyButton.disabled = reorderMode;
     copyButton.addEventListener("click", () => {
       vscode.postMessage({ type: "copy", value: item.text });
     });
@@ -190,6 +252,7 @@ function render(items) {
     pinButton.type = "button";
     pinButton.className = isPinned ? "pinned" : "";
     pinButton.textContent = isPinned ? "Unpin" : "Pin";
+    pinButton.disabled = reorderMode;
     pinButton.addEventListener("click", () => {
       vscode.postMessage({ type: "pinToggle", value: item.text });
     });
@@ -198,6 +261,7 @@ function render(items) {
     noteButton.type = "button";
     noteButton.className = "secondary-action";
     noteButton.textContent = item.note ? "Edit Note" : "Add Note";
+    noteButton.disabled = reorderMode;
     noteButton.addEventListener("click", () => {
       requestNoteInput(item);
     });
@@ -205,6 +269,7 @@ function render(items) {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.textContent = "Delete";
+    deleteButton.disabled = reorderMode;
     deleteButton.addEventListener("click", () => {
       vscode.postMessage({ type: "delete", value: item.text });
     });

@@ -31,6 +31,12 @@ body {
   background: var(--vscode-input-background);
 }
 
+#reorder-toggle {
+  align-self: flex-start;
+  font-size: 0.75em;
+  padding: 4px 8px;
+}
+
 .kbd-hint {
   font-size: 0.75em;
   color: var(--vscode-descriptionForeground);
@@ -50,6 +56,23 @@ body {
 
 .clip-item:hover {
   background-color: var(--vscode-list-hoverBackground);
+}
+
+.clip-item.reorder-on {
+  cursor: grab;
+}
+
+.clip-item.reorder-on:active {
+  cursor: grabbing;
+}
+
+.clip-item.dragging {
+  opacity: 0.55;
+}
+
+.clip-item.drop-target {
+  outline: 2px dashed var(--vscode-focusBorder);
+  outline-offset: -2px;
 }
 
 .clip-item.selected {

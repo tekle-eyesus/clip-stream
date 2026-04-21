@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import type { ClipboardEntry } from './ClipboardManager';
 
 type WebviewInboundMessage = {
-    type: 'insert' | 'copy' | 'delete' | 'pinToggle' | 'setNote' | 'requestNote';
+    type: 'insert' | 'copy' | 'delete' | 'pinToggle' | 'setNote' | 'requestNote' | 'reorder';
     value?: string;
+    targetValue?: string;
     note?: string;
 };
 
@@ -49,7 +50,8 @@ export class ClipboardViewProvider implements vscode.WebviewViewProvider {
             <body>
                 <div class="toolbar">
                     <input id="search-input" type="search" placeholder="Search clips (Ctrl/Cmd+F)" aria-label="Search clips" />
-                    <div class="kbd-hint">Arrows: Select | Enter: Insert | P: Pin | N: Note | Del: Remove</div>
+                    <button id="reorder-toggle" type="button" title="Double-click to toggle drag reorder mode">Reorder: Off</button>
+                    <div class="kbd-hint">Arrows: Select | Enter: Insert | P: Pin | N: Note | Del: Remove | Dbl-click Reorder to drag</div>
                 </div>
                 <div id="item-list"></div>
                 <script src="${scriptUri}"></script>
