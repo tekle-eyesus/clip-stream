@@ -147,6 +147,31 @@ export function activate(context: vscode.ExtensionContext) {
                 await saveNoteForClip(value, enteredNote);
                 break;
             }
+            case 'reorder': {
+                const source = data.value ?? '';
+                const target = data.targetValue ?? '';
+
+                if (!source || !target || source === target) {
+                    break;
+                }
+
+                const isSourcePinned = pinnedHistory.has(source);
+                const isTargetPinned = pinnedHistory.has(target);
+
+                if (isSourcePinned !== isTargetPinned) {
+                    vscode.window.showInformationMessage('Reordering is allowed only within pinned or unpinned groups.');
+                    break;
+                }
+
+                const moved = clipboardManager.moveEntryBefore(source, target);
+                if (!moved) {
+                    break;
+                }
+
+                await context.globalState.update(CLIP_HISTORY_KEY, clipboardManager.getHistory());
+                updateView();
+                break;
+            }
         }
     });
 

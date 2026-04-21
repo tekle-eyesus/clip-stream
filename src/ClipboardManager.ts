@@ -134,6 +134,28 @@ export class ClipboardManager {
         return true;
     }
 
+    moveEntryBefore(sourceText: string, targetText: string): boolean {
+        const source = normalizeText(sourceText);
+        const target = normalizeText(targetText);
+
+        if (!source || !target || source === target) {
+            return false;
+        }
+
+        const sourceIndex = this.history.findIndex((entry) => entry.text === source);
+        const targetIndex = this.history.findIndex((entry) => entry.text === target);
+
+        if (sourceIndex < 0 || targetIndex < 0) {
+            return false;
+        }
+
+        const [movedEntry] = this.history.splice(sourceIndex, 1);
+        const adjustedTargetIndex = this.history.findIndex((entry) => entry.text === target);
+
+        this.history.splice(adjustedTargetIndex, 0, movedEntry);
+        return true;
+    }
+
     clearHistory(): void {
         this.history = [];
     }
