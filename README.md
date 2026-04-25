@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-	<img src="https://img.shields.io/badge/version-0.0.1-blue" alt="Version" />
+	<img src="https://img.shields.io/badge/version-0.0.2-blue" alt="Version" />
 	<img src="https://img.shields.io/badge/VS%20Code-%5E1.80.0-007ACC" alt="VS Code" />
 	<img src="https://img.shields.io/badge/TypeScript-%5E5.0.0-3178C6" alt="TypeScript" />
 	<img src="https://img.shields.io/badge/Node.js-%5E22.x-339933" alt="Node.js" />

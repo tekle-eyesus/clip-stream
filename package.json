@@ -2,7 +2,7 @@
   "name": "clip-stream",
   "displayName": "Clipboard Stream",
   "description": "Clipboard history manager for VS Code with search, pinning, and keyboard-first actions.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "Tekleeyesus",
   "license": "MIT",
   "repository": {
